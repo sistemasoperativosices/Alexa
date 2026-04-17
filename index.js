@@ -26,13 +26,23 @@ app.post('/alexa', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: userText }],
+        messages: [
+          {
+            role: 'system',
+            content: 'Sos un asistente de voz. Respondé siempre de forma clara, breve y en texto plano sin asteriscos, sin guiones, sin numeración ni ningún formato especial. Solo texto normal como si estuvieras hablando.'
+          },
+          {
+            role: 'user',
+            content: userText
+          }
+        ],
         max_tokens: 300
       })
     });
 
     const data = await response.json();
-    const answer = data.choices[0].message.content;
+    const raw = data.choices[0].message.content;
+    const answer = raw.replace(/\*+/g, '').replace(/#+/g, '').replace(/\n+/g, ' ').trim();
 
     return res.json({
       version: '1.0',
